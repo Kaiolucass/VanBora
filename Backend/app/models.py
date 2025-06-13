@@ -1,9 +1,7 @@
-# app/models/usuario.py
-from sqlalchemy import Column, String
-from sqlalchemy.dialects.sqlite import BLOB
-from sqlalchemy.orm import relationship
-from app.core.database import Base
+from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
+from core import Base
 import uuid
+from datetime import datetime
 
 class Usuario(Base):
     __tablename__ = "usuarios"
@@ -11,14 +9,7 @@ class Usuario(Base):
     nome = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     senha = Column(String, nullable=False)
-    tipo_perfil = Column(String, nullable=False)  # motorista ou passageiro
-
-
-# app/models/van.py
-from sqlalchemy import Column, String, Integer, ForeignKey
-from sqlalchemy.orm import relationship
-from app.core.database import Base
-import uuid
+    tipo_perfil = Column(String, nullable=False)
 
 class Van(Base):
     __tablename__ = "vans"
@@ -27,14 +18,6 @@ class Van(Base):
     modelo = Column(String)
     capacidade = Column(Integer)
     motorista_id = Column(String, ForeignKey("usuarios.id"))
-
-
-# app/models/viagem.py
-from sqlalchemy import Column, String, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
-from app.core.database import Base
-import uuid
-from datetime import datetime
 
 class Viagem(Base):
     __tablename__ = "viagens"

@@ -1,25 +1,17 @@
-# Estrutura base do Backend do VanBora (FastAPI - MVP)
-
-# app/main.py
 from fastapi import FastAPI
-from app.routers import auth, viagens, vans
-from app.core.database import create_db
+from core import create_db
+from routers import auth_routes, viagem_routes, van_routes
 
-app = FastAPI(title="VanBora API")
+app = FastAPI()
 
-app.include_router(auth.router, prefix="/auth", tags=["Auth"])
-app.include_router(viagens.router, prefix="/viagens", tags=["Viagens"])
-app.include_router(vans.router, prefix="/vans", tags=["Vans"])
+app.include_router(auth_routes, prefix="/auth", tags=["Auth"])
+app.include_router(viagem_routes, prefix="/viagens", tags=["Viagens"])
+app.include_router(van_routes, prefix="/vans", tags=["Vans"])
 
 @app.on_event("startup")
-def startup():
+def on_startup():
     create_db()
 
 @app.get("/")
-def home():
-    return {"msg": "VanBora API MVP"}
-
-
-
-
-
+def root():
+    return {"msg": "VanBora API Online"}
