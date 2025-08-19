@@ -1,0 +1,12 @@
+{
+    "launch": {
+
+       "editor.quickSuggestions": {
+  "other": false,
+  "comments": false,
+  "strings": false
+},
+"editor.suggest.showWords": false
+
+    }
+}
