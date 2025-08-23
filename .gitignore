@@ -1,0 +1,67 @@
+# =========================
+# BACKEND (FastAPI / Python)
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual env
+.venv/
+env/
+venv/
+ENV/
+
+# IDE configs
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.*
+
+# =========================
+# FRONTEND (Flutter / Dart)
+# =========================
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+
+# Build outputs
+build/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+macos/Flutter/GeneratedPluginRegistrant.swift
+windows/flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# Android related
+*.apk
+*.aar
+*.iml
+.gradle/
+local.properties
+**/GeneratedPluginRegistrant.java
+
+# Xcode related
+DerivedData/
+*.xcworkspace
+*.xcuserstate
+Pods/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# =========================
+# GENERAL
+# =========================
+.DS_Store
+Thumbs.db
