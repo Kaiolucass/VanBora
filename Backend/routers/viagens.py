@@ -28,3 +28,12 @@ def criar_viagem(viagem: ViagemCreate, db: Session = Depends(get_db)):
 def listar_viagens(db: Session = Depends(get_db)):
     return db.query(Viagem).all()
 
+@router.get("/passageiro/{id}", response_model=List[ViagemResponse])
+def listar_viagens_passageiro(id: int, db: Session = Depends(get_db)):
+    viagens = db.query(Viagem).filter(Viagem.passageiro_id == id).all()
+    return viagens
+
+@router.get("/motorista/{id}", response_model=List[ViagemResponse])
+def listar_viagens_motorista(id: int, db: Session = Depends(get_db)):
+    viagens = db.query(Viagem).filter(Viagem.motorista_id == id).all()
+    return viagens

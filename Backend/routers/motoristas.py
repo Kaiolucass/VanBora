@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from core.database import get_db
 from models.models import Motorista
 from schemas.motoristas_schema import MotoristaCreate, MotoristaResponse
+from typing import List  
 
 router = APIRouter(prefix="/motoristas", tags=["Motoristas"])
 
@@ -19,3 +20,7 @@ def criar_motorista(motorista: MotoristaCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(novo_motorista)
     return novo_motorista
+
+@router.get("/", response_model=List[MotoristaResponse])
+def listar_motoristas(db: Session = Depends(get_db)):
+    return db.query(Motorista).all()
