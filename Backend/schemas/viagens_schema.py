@@ -1,20 +1,34 @@
 # backend/app/schemas/viagens_schema.py
 
 from pydantic import BaseModel
-from datetime import date, time
+from datetime import datetime
+from typing import List
 
 class ViagemBase(BaseModel):
-    data: date
-    hora: time
+    data_hora: datetime
+    rota_id: int
 
 class ViagemCreate(ViagemBase):
-    van_id: int
-    passageiro_id: int
+    pass
 
 class ViagemResponse(ViagemBase):
     id: int
-    van_id: int
+    class Config:
+        from_attributes = True
+
+
+
+class ViagemPassageiroBase(BaseModel):
+    viagem_id: int
     passageiro_id: int
+    confirmado: bool = False
+
+class ViagemPassageiroCreate(ViagemPassageiroBase):
+    pass
+
+class ViagemPassageiroResponse(ViagemPassageiroBase):
+    id: int
 
     class Config:
-        orm_mode = True
+       from_attributes = True
+

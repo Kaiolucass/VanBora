@@ -11,7 +11,8 @@ Base = declarative_base()
 
 # CRIA AS TABELAS NO BANCO (executar uma vez só)
 def create_db():
-    from models.models import Motorista, Passageiro, Van, Viagem
+    from models.models import Motorista, Passageiro, Van, Viagem, ViagemPassageiro, Rota, Parada
+    # Importa os modelos aqui para evitar importações circulares
     Base.metadata.create_all(bind=engine)
 
 

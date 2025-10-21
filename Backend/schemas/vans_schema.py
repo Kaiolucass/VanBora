@@ -6,6 +6,7 @@ from typing import Optional
 class VanBase(BaseModel):
     modelo: str
     placa: str
+    capacidade: int 
 
 class VanCreate(VanBase):
     motorista_id: int
@@ -15,4 +16,4 @@ class VanResponse(VanBase):
     motorista_id: int
 
     class Config:
-        orm_mode = True
+       from_attributes = True
