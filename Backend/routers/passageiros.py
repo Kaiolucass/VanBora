@@ -13,7 +13,6 @@ class PassageiroCreate(BaseModel):
     nome: str
     email: str
     senha: str
-    telefone: str
 
     class Config:
         orm_mode = True

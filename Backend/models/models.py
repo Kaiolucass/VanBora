@@ -66,7 +66,6 @@ class Passageiro(Base):
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String(100), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
-    telefone = Column(String(20), nullable=False)
     senha = Column(String(255), nullable=False)
 
     parada_id = Column(Integer, ForeignKey("paradas.id", ondelete="SET NULL"))
