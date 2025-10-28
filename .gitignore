@@ -65,3 +65,6 @@ Pods/
 # =========================
 .DS_Store
 Thumbs.db
+
+*.hprof
+
