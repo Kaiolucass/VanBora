@@ -27,6 +27,21 @@ class _RegisterPassageiroScreenState extends State<RegisterPassageiroScreen> {
 
   Future<void> registerPassageiro() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // Validação adicional de email e senha
+    if (emailCtrl.text != confirmarEmailCtrl.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Os emails não coincidem.")),
+      );
+      return;
+    }
+    if (senhaCtrl.text != confirmarSenhaCtrl.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("As senhas não coincidem.")),
+      );
+      return;
+    }
+
     setState(() => isLoading = true);
 
     final url = Uri.parse("${ApiConfig.baseUrl}/passageiros/");
@@ -34,7 +49,6 @@ class _RegisterPassageiroScreenState extends State<RegisterPassageiroScreen> {
       "nome": nomeCtrl.text,
       "email": emailCtrl.text,
       "senha": senhaCtrl.text,
-      "telefone": telefoneCtrl.text,
     };
 
     try {
@@ -152,13 +166,22 @@ class _RegisterPassageiroScreenState extends State<RegisterPassageiroScreen> {
                                   ),
                           ),
                         ),
+
                         const SizedBox(height: 16),
+
+                        // 🔹 Texto "Já sou cadastrado"
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                            );
+                          },
                           child: const Text(
-                            'Esqueci minha senha',
+                            'Já sou cadastrado',
                             style: TextStyle(
                               color: Colors.white,
+                              fontSize: 16,
                               decoration: TextDecoration.underline,
                             ),
                           ),

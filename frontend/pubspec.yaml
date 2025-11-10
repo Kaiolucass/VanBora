@@ -9,7 +9,8 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^6.0.0
-  http: ^0.13.6
+  http: ^1.1.0
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -20,10 +21,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/  
-    - .env              
+    - assets/images/
+    - .env
 
-flutter_icons:                     
+flutter_icons:
   android: true
   ios: true
   image_path: "assets/images/icone-vanbora.png"

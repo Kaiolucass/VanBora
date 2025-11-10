@@ -20,7 +20,7 @@ class _RegisterMotoristaScreenState extends State<RegisterMotoristaScreen> {
   final emailCtrl = TextEditingController();
   final confirmarEmailCtrl = TextEditingController();
   final cpfCtrl = TextEditingController();
-  final cnhCtrl = TextEditingController();
+  final cnhCtrl = TextEditingController(); // ✅ Adicionado
   final placaCtrl = TextEditingController();
   final modeloCtrl = TextEditingController();
   final capacidadeCtrl = TextEditingController();
@@ -51,7 +51,6 @@ class _RegisterMotoristaScreenState extends State<RegisterMotoristaScreen> {
     final body = {
       "nome": nomeCtrl.text,
       "email": emailCtrl.text,
-      "telefone": "", // opcional
       "senha": senhaCtrl.text,
       "cpf": cpfCtrl.text,
       "cnh": cnhCtrl.text,
@@ -92,7 +91,8 @@ class _RegisterMotoristaScreenState extends State<RegisterMotoristaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: Color(0xFF1F1F1F),
+    return Scaffold(
+      backgroundColor: const Color(0xFF1F1F1F),
       body: Column(
         children: [
           // 🔹 Topo com logo
@@ -174,8 +174,28 @@ class _RegisterMotoristaScreenState extends State<RegisterMotoristaScreen> {
                               ),
                             ),
                             child: isLoading
-                                ? const CircularProgressIndicator(color: Color(0xFFFFFFFF))
+                                ? const CircularProgressIndicator(color: Colors.white)
                                 : const Text('Cadastrar', style: TextStyle(fontSize: 18)),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // 🔹 Botão "Já sou cadastrado"
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                            );
+                          },
+                          child: const Text(
+                            'Já sou cadastrado',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
                       ],

@@ -1,222 +1,301 @@
 // lib/screens/home_passageiro_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../config/api.dart';
 
-class HomePassageiroScreen extends StatelessWidget {
+const Color _backgroundColor = Color(0xFF1F1F1F);
+const Color _primaryColor = Color(0xFF3E51B5);
+const Color _cardColor = Color(0xFF2C2C2C);
+const Color _textColor = Colors.white;
+const Color _secondaryTextColor = Colors.white70;
+
+class HomePassageiroScreen extends StatefulWidget {
   const HomePassageiroScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1F1F1F),
-      body: Column(
-        children: [
-          // 🔹 Topo azul com info do passageiro
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 40),
-            decoration: const BoxDecoration(
-              color: Color(0xFF3E51B5),
-              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(60)),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('assets/images/perfil.png'),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'Bem vindo',
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      'Sofia Silva',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    SizedBox(height: 10),
-                    Image(
-                      image: AssetImage('assets/images/logo_vanbora02.png'),
-                      height: 50,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+  State<HomePassageiroScreen> createState() => _HomePassageiroScreenState();
+}
 
-          const SizedBox(height: 16),
+class _HomePassageiroScreenState extends State<HomePassageiroScreen> {
+  String? nomePassageiro;
+  String? userId;
+  List<dynamic> viagens = [];
+  bool isLoading = true;
 
-          // 🔹 Grade de botões principais
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: GridView.count(
-              crossAxisCount: 3,
-              shrinkWrap: true,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              children: [
-                _buildMenuIcon(Icons.directions_bus, 'Minha rota'),
-                _buildMenuIcon(Icons.access_time, 'Horários'),
-                _buildMenuIcon(Icons.person, 'Motorista'),
-                _buildMenuIcon(Icons.chat_bubble_outline, 'Chat'),
-                _buildMenuIcon(Icons.school, 'Faculdade'),
-              ],
-            ),
-          ),
+  @override
+  void initState() {
+    super.initState();
+    carregarDados();
+  }
 
-          const SizedBox(height: 24),
+  Future<void> carregarDados() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      nomePassageiro = prefs.getString("nome") ?? "Passageiro(a)";
+      userId = prefs.getString("id");
+    });
 
-          // 🔹 Informações da rota
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Próxima viagem',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
+    if (userId != null) {
+      await fetchViagens();
+    } else {
+      setState(() => isLoading = false);
+    }
+  }
 
-          const SizedBox(height: 10),
+  Future<void> fetchViagens() async {
+    setState(() => isLoading = true);
+    try {
+      final viagensUrl =
+          Uri.parse("${ApiConfig.baseUrl}/viagem-passageiros/passageiro/$userId");
+      final res = await http.get(viagensUrl);
 
-          // 🔹 Cartão da rota
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2C),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const Icon(Icons.route, color: Colors.white, size: 40),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text('Faculdade JK - Taguatinga', style: TextStyle(color: Colors.white, fontSize: 16)),
-                        SizedBox(height: 4),
-                        Text('Horário de saída: 05:40', style: TextStyle(color: Colors.white70)),
-                        SizedBox(height: 4),
-                        Text('Motorista: Kaio Lucas', style: TextStyle(color: Colors.white70)),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text('Confirmado', style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-              ),
-            ),
-          ),
+      if (res.statusCode == 200) {
+        viagens = jsonDecode(res.body);
+      } else {
+        viagens = [];
+      }
 
-          const SizedBox(height: 24),
+      viagens.sort((a, b) => (a["horario_saida"] ?? "").compareTo(b["horario_saida"] ?? ""));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erro ao buscar passageiros: $e")),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
 
-          // 🔹 Histórico de viagens
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Histórico recente',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
+  Widget _buildProfileAvatar() {
+    if (nomePassageiro == null || nomePassageiro!.isEmpty) {
+      return const CircleAvatar(
+        radius: 30,
+        backgroundColor: Colors.white24,
+        child: Icon(Icons.person, color: Colors.white, size: 30),
+      );
+    }
 
-          const SizedBox(height: 10),
+    final parts = nomePassageiro!.split(" ");
+    final initials = parts.isNotEmpty
+        ? (parts[0][0] + (parts.length > 1 ? parts.last[0] : ""))
+        : "P";
 
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              children: [
-                _buildHistoricoItem('Faculdade JK', '05:40', true),
-                _buildHistoricoItem('Faculdade Anhanguera', '05:45', false),
-              ],
-            ),
-          ),
-        ],
+    return CircleAvatar(
+      radius: 30,
+      backgroundColor: Colors.white24,
+      child: Text(
+        initials.toUpperCase(),
+        style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
       ),
+    );
+  }
 
-      // 🔹 Barra inferior
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: const BoxDecoration(
-          color: Color(0xFF3E51B5),
-          borderRadius: BorderRadius.only(topRight: Radius.circular(30), topLeft: Radius.circular(30)),
+  Widget _menuButton(IconData icon, String label) {
+    return InkWell(
+      onTap: () => ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Atalho para $label clicado"))),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: _cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: _primaryColor.withOpacity(0.3), width: 1),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: const [
-            Icon(Icons.home, color: Colors.white, size: 32),
-            Icon(Icons.chat_bubble_outline, color: Colors.white70, size: 32),
-            Icon(Icons.person, color: Colors.white70, size: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: _primaryColor, size: 30),
+            const SizedBox(height: 8),
+            Text(label, style: const TextStyle(color: _secondaryTextColor, fontSize: 12)),
           ],
         ),
       ),
     );
   }
 
-  // 🔸 Widget de ícone do menu
-  static Widget _buildMenuIcon(IconData icon, String label) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2C),
-        borderRadius: BorderRadius.circular(16),
-      ),
+  Widget _buildEmptyPassengerState() {
+    return const Padding(
+      padding: EdgeInsets.all(30.0),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.white, size: 40),
-          const SizedBox(height: 8),
-          Text(label, style: const TextStyle(color: Colors.white)),
+          Icon(Icons.person_off, color: Colors.white70, size: 40),
+          SizedBox(height: 10),
+          Text(
+            "Nenhum passageiro encontrado para esta van.",
+            style: TextStyle(color: Colors.white70, fontSize: 16),
+          ),
         ],
       ),
     );
   }
 
-  // 🔸 Widget de histórico
-  static Widget _buildHistoricoItem(String destino, String horario, bool confirmado) {
+  // 🔹 Novo: Card de passageiro
+  Widget _buildPassageiroCard(Map<String, dynamic> viagem) {
+    final nome = viagem["passageiro_nome"] ?? "Desconhecido";
+    final confirmado = viagem["confirmado"] == true;
+    final statusColor = confirmado ? Colors.green : Colors.redAccent;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2C),
+        color: _cardColor,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 4, offset: const Offset(0, 2)),
+        ],
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Icon(Icons.location_on, color: Colors.white70),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(destino, style: const TextStyle(color: Colors.white, fontSize: 16)),
+          Row(
+            children: [
+              const Icon(Icons.person, color: _textColor),
+              const SizedBox(width: 10),
+              Text(
+                nome,
+                style: const TextStyle(
+                  color: _textColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: confirmado ? Colors.green : Colors.redAccent,
+              color: statusColor,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              confirmado ? 'Confirmado' : 'Cancelado',
-              style: const TextStyle(color: Colors.white, fontSize: 12),
+              confirmado ? "Confirmado" : "Pendente",
+              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
             ),
           ),
-          const SizedBox(width: 10),
-          Text(horario, style: const TextStyle(color: Colors.white70)),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _backgroundColor,
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator(color: _primaryColor))
+          : RefreshIndicator(
+              onRefresh: fetchViagens,
+              color: _primaryColor,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    // 🔹 Cabeçalho
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.only(top: 60, left: 20, right: 20, bottom: 30),
+                      decoration: const BoxDecoration(
+                        color: _primaryColor,
+                        borderRadius: BorderRadius.only(bottomRight: Radius.circular(60)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          _buildProfileAvatar(),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text("Bem-vindo(a),",
+                                    style: TextStyle(color: Colors.white70, fontSize: 16)),
+                                Text(
+                                  nomePassageiro ?? "Passageiro(a)",
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.bus_alert, color: Colors.white, size: 40)
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    // 🔹 Menu
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: _cardColor,
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 4)),
+                          ],
+                        ),
+                        child: GridView.count(
+                          crossAxisCount: 3,
+                          shrinkWrap: true,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 1.0,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            _menuButton(Icons.map, "Rotas"),
+                            _menuButton(Icons.schedule, "Horários"),
+                            _menuButton(Icons.notifications_active, "Avisos"),
+                            _menuButton(Icons.chat_bubble_outline, "Chat"),
+                            _menuButton(Icons.school, "Faculdades"),
+                            _menuButton(Icons.settings, "Config."),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // 🔹 Lista de passageiros
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text("Próximos passageiros",
+                            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: viagens.isEmpty
+                          ? _buildEmptyPassengerState()
+                          : Column(children: viagens.map((v) => _buildPassageiroCard(v)).toList()),
+                    ),
+
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: _primaryColor,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
+        currentIndex: 0,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Início"),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: "Rotas"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "Chat"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Perfil"),
         ],
       ),
     );

@@ -4,7 +4,6 @@ from pydantic import BaseModel
 class PassageiroBase(BaseModel):
     nome: str
     email: str
-    telefone: str | None = None
 
 class PassageiroCreate(PassageiroBase):
     senha: str
